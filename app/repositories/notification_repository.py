@@ -77,9 +77,3 @@ class NotificationRepository:
         notification.retry_count += 1
         self.db.flush()
         return notification
-
-    def count_recent_for_user(self, user_id: str, since: datetime) -> int:
-        stmt = select(func.count()).where(
-            Notification.user_id == user_id, Notification.created_at >= since
-        )
-        return self.db.execute(stmt).scalar_one()
