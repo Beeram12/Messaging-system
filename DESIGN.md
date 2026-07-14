@@ -21,9 +21,9 @@
      │  notifications    │◄──────────────┤ notifications.      │
      │  user_preferences │   read status │   delivery (priority)│
      │  templates         │              │ notifications.retry  │
-     │  idempotency_keys  │              │ notifications.       │
-     │  notification_     │              │   delivery.dead_letter│
-     │   attempts          │              └──────────┬───────────┘
+     │  notification_     │              │ notifications.       │
+     │   attempts          │              │   delivery.dead_letter│
+     │  rate_limit_buckets│              └──────────┬───────────┘
      └──────────▲──────────┘                          │
                 │  status updates                      ▼
                 │                          ┌─────────────────────┐
@@ -45,7 +45,6 @@ RabbitMQ broker — either can be scaled, deployed, or restarted independently.
 | `notification_attempts` | Audit trail — one row per delivery attempt | `notification_id` (FK), `attempt_number`, `status`, `error_message`, `created_at` |
 | `user_preferences` | Per-user, per-channel opt-in/opt-out | composite PK `(user_id, channel)`, `enabled` |
 | `templates` | Reusable message templates with `{{var}}` placeholders | `id` (PK), `subject`, `body` |
-| `idempotency_keys` | (Currently folded into `notifications.idempotency_key` unique index; kept as a model for a future scenario where idempotency needs to span multiple writes) | `key` (PK), `notification_id` |
 | `rate_limit_buckets` | Token-bucket state for per-user rate limiting; one row per user | `user_id` (PK), `tokens` (remaining, float), `last_refill_at` |
 
 **Design notes:**
@@ -119,4 +118,3 @@ RabbitMQ broker — either can be scaled, deployed, or restarted independently.
 | RabbitMQ TTL-queue trick for delayed retry instead of the delayed-message-exchange plugin | Creates one queue per distinct delay value (bounded: only 3 possible delays here) | Avoids depending on a non-default RabbitMQ plugin, keeping `docker-compose up` simple with the stock image |
 | Idempotency key uniqueness enforced at DB (unique index) + app-level pre-check | Small race window between check and insert is still closed by the DB constraint, but a concurrent duplicate request would get a 500 rather than a clean "here's the existing one" | Acceptable for this scope; a stricter version would catch the `IntegrityError` and re-fetch, which is a natural follow-up |
 | Single "priority" RabbitMQ queue (`x-max-priority`) vs. 4 separate queues | RabbitMQ priority queues don't give perfectly strict ordering under high load (some slop) | Simpler operationally (one queue, one consumer group) and "critical processed before low" is a soft ordering guarantee, not a hard real-time one, per the requirement wording |
-| No separate `idempotency_keys` table lookup path is actually used (folded into `notifications.idempotency_key`) | Slight redundancy in the schema | Kept as a placeholder/seam for a future case where idempotency needs to guard multi-row writes, without a schema migration |

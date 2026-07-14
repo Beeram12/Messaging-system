@@ -1,12 +1,13 @@
 import enum
 
-
+# Notification channel
 class Channel(str, enum.Enum):
     EMAIL = "email"
     SMS = "sms"
     PUSH = "push"
 
 
+# Notification priority
 class Priority(str, enum.Enum):
     CRITICAL = "critical"
     HIGH = "high"
@@ -24,6 +25,7 @@ class Priority(str, enum.Enum):
         }[self]
 
 
+# Notification status
 class NotificationStatus(str, enum.Enum):
     PENDING = "pending"
     QUEUED = "queued"

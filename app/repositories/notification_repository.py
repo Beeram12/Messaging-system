@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.enums import NotificationStatus
 from app.models.notification import Notification, NotificationAttempt
 
-
+# NotificationRepository is responsible for interacting with the notification model and performing CRUD operations.
 class NotificationRepository:
     def __init__(self, db: Session):
         self.db = db
