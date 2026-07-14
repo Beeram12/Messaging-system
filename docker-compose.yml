@@ -42,7 +42,8 @@ services:
       context: .
       target: api
     ports:
-      - "8000:8000"
+      # Host 8000 is often taken (e.g. BuildKit); use 8001 externally.
+      - "8001:8000"
     environment:
       DATABASE_URL: postgresql+psycopg://notif_user:notif_pass@postgres:5432/notifications
       RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
