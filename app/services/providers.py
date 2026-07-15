@@ -3,11 +3,11 @@ from abc import ABC, abstractmethod
 
 from app.models.enums import Channel
 
-
+# Provider error
 class ProviderError(Exception):
     """Raised when a mocked provider fails to deliver a message."""
 
-
+# Notification provider
 class NotificationProvider(ABC):
     channel: Channel
 
@@ -15,7 +15,7 @@ class NotificationProvider(ABC):
     def send(self, *, user_id: str, subject: str | None, body: str) -> str:
         """Send the message. Returns a provider message id on success, raises ProviderError on failure."""
 
-
+# Mock email provider
 class MockEmailProvider(NotificationProvider):
     channel = Channel.EMAIL
 
@@ -24,7 +24,7 @@ class MockEmailProvider(NotificationProvider):
             raise ProviderError("Simulated email provider failure")
         return f"email-{random.randint(100000, 999999)}"
 
-
+# Mock SMS provider
 class MockSmsProvider(NotificationProvider):
     channel = Channel.SMS
 
@@ -35,7 +35,7 @@ class MockSmsProvider(NotificationProvider):
             raise ProviderError("Simulated SMS provider failure")
         return f"sms-{random.randint(100000, 999999)}"
 
-
+# Mock push provider
 class MockPushProvider(NotificationProvider):
     channel = Channel.PUSH
 
@@ -44,13 +44,13 @@ class MockPushProvider(NotificationProvider):
             raise ProviderError("Simulated push provider failure")
         return f"push-{random.randint(100000, 999999)}"
 
-
+# Providers map
 _PROVIDERS: dict[Channel, NotificationProvider] = {
     Channel.EMAIL: MockEmailProvider(),
     Channel.SMS: MockSmsProvider(),
     Channel.PUSH: MockPushProvider(),
 }
 
-
+# Get the provider for a given channel
 def get_provider(channel: Channel) -> NotificationProvider:
     return _PROVIDERS[channel]

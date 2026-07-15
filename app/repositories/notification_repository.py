@@ -12,18 +12,22 @@ class NotificationRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    # Create a new notification
     def create(self, notification: Notification) -> Notification:
         self.db.add(notification)
         self.db.flush()
         return notification
 
+    # Get a notification by id
     def get_by_id(self, notification_id: uuid.UUID) -> Notification | None:
         return self.db.get(Notification, notification_id)
 
+    # Get a notification by idempotency key
     def get_by_idempotency_key(self, idempotency_key: str) -> Notification | None:
         stmt = select(Notification).where(Notification.idempotency_key == idempotency_key)
         return self.db.execute(stmt).scalar_one_or_none()
 
+    # List notifications for a user
     def list_for_user(
         self, user_id: str, limit: int = 50, offset: int = 0
     ) -> tuple[list[Notification], int]:
@@ -40,6 +44,7 @@ class NotificationRepository:
         )
         return list(items), total
 
+    # Update the status of the notification
     def update_status(
         self,
         notification: Notification,
@@ -56,6 +61,7 @@ class NotificationRepository:
         self.db.flush()
         return notification
 
+    # Record an attempt to send the notification
     def record_attempt(
         self,
         notification: Notification,
@@ -73,6 +79,7 @@ class NotificationRepository:
         self.db.flush()
         return attempt
 
+    # Increment the retry count of the notification
     def increment_retry_count(self, notification: Notification) -> Notification:
         notification.retry_count += 1
         self.db.flush()

@@ -39,6 +39,7 @@ def process_message(notification_id: uuid.UUID) -> None:
         attempt_number = notification.retry_count + 1
         provider = get_provider(notification.channel)
 
+        # Send the notification
         try:
             provider_message_id = provider.send(
                 user_id=notification.user_id,
